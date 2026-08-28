@@ -33,7 +33,7 @@ export default function Navbar() {
       name: "About Us",
       href: "#",
       dropdown: [
-        { name: "About SiliconSoft", href: "/about_np_it.php" },
+        { name: "About Softsilicon Infotech", href: "/about_np_it.php" },
         { name: "Our Team", href: "/our_team.php" },
       ],
     },
