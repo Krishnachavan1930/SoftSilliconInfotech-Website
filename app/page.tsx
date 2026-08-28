@@ -133,7 +133,7 @@ export default function HomePage() {
               Leading IT & Software Development Company
             </span>
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-heading tracking-tight leading-none">
-              SiliconSoft Infotech LLP Build Brands With <span className="text-primary font-bold">360° Solutions</span>
+              Softsilicon Infotech LLP Build Brands With <span className="text-primary font-bold">360° Solutions</span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed max-w-xl">
               We believe in Simple, Creative & Flexible Design and Development Standards. Creating world-class custom web portals, mobile apps, hosting, and marketing solutions that drive growth.
