@@ -38,7 +38,7 @@ export default function AboutPage() {
 
   return (
     <div className="space-y-0">
-      <PageBanner title="About SiliconSoft Infotech LLP" subtitle="Who We Are?" />
+      <PageBanner title="About Softsilicon Infotech LLP" subtitle="Who We Are?" />
 
       {/* Main Content */}
       <section className="py-20 bg-white">
@@ -51,7 +51,7 @@ export default function AboutPage() {
                 Driving Success Through Collaboration and Innovation
               </h2>
               <p className="text-slate-600 leading-relaxed">
-                SiliconSoft Infotech LLP is a group of IT experts accompanied by a promise of conveying technology-enabled business solutions. We give world-class software and Web Development services that focus on assuming a supportive role to your business.
+               Softsilicon Infotech LLP is a group of IT experts accompanied by a promise of conveying technology-enabled business solutions. We give world-class software and Web Development services that focus on assuming a supportive role to your business.
               </p>
               <p className="text-slate-600 leading-relaxed">
                 With a strong presence and trusted client partnerships worldwide, we excel in engineering custom software applications, premium website architectures, native mobile products, and result-oriented digital marketing configurations.
@@ -91,7 +91,7 @@ export default function AboutPage() {
           <div className="max-w-3xl mx-auto text-center mb-16">
             <span className="text-primary font-semibold text-sm tracking-widest uppercase">Values</span>
             <h2 className="text-3xl font-extrabold text-slate-900 mt-2 font-heading tracking-tight">
-              Why Choose SiliconSoft Infotech LLP?
+              Why Choose SoftSilicon Infotech LLP?
             </h2>
             <p className="text-slate-500 mt-4 leading-relaxed">
               We stand out in the IT market because we always focus on our client's end-users, pain points, and commercial targets.
