@@ -98,16 +98,16 @@ export default function Footer() {
               <div className="flex items-start space-x-3">
                 <Mail size={16} className="text-primary mt-1 shrink-0" />
                 <div>
-                  <a href="mailto:info@SiliconSoftsolutions.in" className="hover:text-white block">info@SiliconSoftsolutions.in</a>
-                  <a href="mailto:SiliconSoftsolutionsnashik@gmail.com" className="hover:text-white block text-xs">SiliconSoftsolutionsnashik@gmail.com</a>
+                  <a href="mailto:info@softsiliconinfotech.com" className="hover:text-white block">info@softsiliconinfotech.com</a>
+                  <a href="mailto:softsiliconinfotech@gmail.com" className="hover:text-white block text-xs">softsiliconinfotech@gmail.com</a>
                 </div>
               </div>
               
               <div className="flex items-start space-x-3">
                 <Phone size={16} className="text-primary mt-1 shrink-0" />
                 <div>
-                  <a href="tel:+919665819110" className="hover:text-white block">+91 9665819110</a>
-                  <a href="tel:+919665818381" className="hover:text-white block">+91 9665818381</a>
+                  <a href="tel:+918411907864" className="hover:text-white block">+91 8411907864</a>
+                  <a href="tel:+919168066821" className="hover:text-white block">+91 9168066821</a>
                 </div>
               </div>
             </div>
