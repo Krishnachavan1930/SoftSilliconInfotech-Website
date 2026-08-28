@@ -113,7 +113,7 @@ export default function Navbar() {
               <Phone size={13} className="text-primary" />
               <span>+91 9665819110</span>
             </a>
-            <a href="mailto:info@SiliconSoftsolutions.in" className="flex items-center space-x-1.5 hover:text-white transition-colors">
+            <a href="mailto:info@softsiliconinfotech.com" className="flex items-center space-x-1.5 hover:text-white transition-colors">
               <Mail size={13} className="text-primary" />
               <span>info@SiliconSoftsolutions.in</span>
             </a>
