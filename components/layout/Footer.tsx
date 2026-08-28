@@ -27,8 +27,7 @@ export default function Footer() {
 
   const offices = [
     {
-      city: "Nashik",
-      address: "Office No 106, 2nd Floor, Abhonkar Lane, Raviwar Karanja, Panchavati, Nashik 422003",
+         address: "410, 4th Floor, Silicon Business Center, Guru Gobind Singh College Road, Near Pathardi Gaon Circle, Nashik, Maharashtra 422010",
     },
   ];
 
@@ -145,7 +144,7 @@ export default function Footer() {
         {/* Bottom copyright */}
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-600">
           <p>© {new Date().getFullYear()} SiliconSoft Infotech LLP. All Rights Reserved.</p>
-          <p className="mt-2 md:mt-0">ISO 9001:2015 Certified IT Solutions Agency</p>
+      <p className="mt-2 md:mt-0">ISO 9001:2015 Certified IT Solutions Agency</p> 
         </div>
       </div>
     </footer>
