@@ -49,7 +49,7 @@ export default function Footer() {
               </div>
             </Link>
             <p className="text-sm leading-relaxed text-slate-500">
-              SiliconSoft Infotech LLP is a group of IT experts, who accompanied a promise of conveying technology-enabled business solutions. We give world-class software and Web Development services.
+              Softsilicon Infotech LLP is a group of IT experts, who accompanied a promise of conveying technology-enabled business solutions. We give world-class software and Web Development services.
             </p>
             <div className="flex items-center space-x-4">
               <a href="#" className="hover:text-primary transition-colors"><Facebook size={18} /></a>
@@ -143,8 +143,8 @@ export default function Footer() {
 
         {/* Bottom copyright */}
         <div className="pt-8 flex flex-col md:flex-row justify-between items-center text-xs text-slate-600">
-          <p>© {new Date().getFullYear()} SiliconSoft Infotech LLP. All Rights Reserved.</p>
-      <p className="mt-2 md:mt-0">ISO 9001:2015 Certified IT Solutions Agency</p> 
+          <p>© {new Date().getFullYear()} Softsilicon Infotech Infotech LLP. All Rights Reserved.</p>
+
         </div>
       </div>
     </footer>
