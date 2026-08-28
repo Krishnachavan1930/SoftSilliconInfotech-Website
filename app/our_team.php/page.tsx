@@ -13,11 +13,11 @@ export default function OurTeamPage() {
       image: "placeholder",
     },
     {
-      name: "Mr.Pramod S. Aswale",
-      role: "CEO",
+   name: "Mr.Pramod S. Aswale",
+     role: "CEO",
       image: "placeholder",
     },
-    {
+/*    {
       name: "Mr. Nandkishor Wagh",
       role: "Lead Systems Architect",
       image: "/assets/img/team-image/3.jpg",
@@ -66,7 +66,7 @@ export default function OurTeamPage() {
       name: "Miss. Kajal Mogal",
       role: "SEO & Digital Analyst",
       image: "/assets/img/team-image/team/6.jpg",
-    },
+    }, */
   ];
 
   return (
