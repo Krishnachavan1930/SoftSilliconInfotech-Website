@@ -61,14 +61,14 @@ export default function ContactUsPage() {
     {
       title: "Email Address",
       icon: <Mail size={24} className="text-primary" />,
-      lines: ["info@SiliconSoftsolutions.in", "SiliconSoftsolutionsnashik@gmail.com"],
+      lines: ["info@softsiliconinfotech.com", "softsiliconinfotech@gmail.com"],
       href: "mailto:info@SiliconSoftsolutions.in",
     },
     {
       title: "Call Us",
       icon: <Phone size={24} className="text-secondary" />,
-      lines: ["+91 9665819110", "+91 9665818381"],
-      href: "tel:+919665819110",
+      lines: ["+91 8411907864"],
+      href: "tel:+918411907864",
     },
     {
       title: "Main Office",
