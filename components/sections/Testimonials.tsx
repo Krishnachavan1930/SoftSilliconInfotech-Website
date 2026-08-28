@@ -13,10 +13,13 @@ interface Testimonial {
 export default function Testimonials() {
   const testimonials: Testimonial[] = [
     {
-      name: "Mr. Prashant Bachhav",
+      name: "Ms Bhaki Mapari",
       role: "Business Owner",
       content:
-        "I recently had the pleasure of working with SiliconSoft Infotech LLP on a custom application project for my business. From start to finish, the team at SiliconSoft Infotech LLP was professional, responsive, and most importantly, delivered a high-quality product that exceeded my expectations. Throughout the project, the team was very communicative and kept me updated on progress and any changes that needed to be made.",
+    "Working with Soft Silicon Infotech LLP to develop our website, primehomedecor.in, was a great experience. The team understood our business requirements very well and transformed our ideas into a modern, professional, and user-friendly website.
+We especially appreciated their professionalism, creativity, timely communication, and attention to detail throughout the project. The website represents our brand beautifully and gives our customers a smooth online experience.
+I highly recommend Soft Silicon Infotech LLP to anyone looking for a reliable and professional web development partner. Thank you to the entire team for their excellent work and support!”
+",
     },
     {
       name: "Mr. Kalathanathan Sir",
