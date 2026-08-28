@@ -75,7 +75,7 @@ export default function ContactUsPage() {
       icon: <MapPin size={24} className="text-accent" />,
       lines: [
         "410, 4th Floor, Silicon Business Centre,",
-        "Guru Gobind Singh College Road, near Pathardi Gaon, Pandav Nagari, Circle, Nashik, Maharashtra 422010",
+        "Guru Gobind Singh College Road, Near Pathardi Gaon circle, Wadala-Parhardi Road, Annexe-Indira Nagar, Nashik, Maharashtra 422010",
       ],
       href: "#",
     },
