@@ -8,13 +8,13 @@ import { User } from "lucide-react";
 export default function OurTeamPage() {
   const team = [
     {
-      name: "Dr. Pramod Aswale",
-      role: "Managing Director",
+      name: "Ms. Neha Pramod Mane",
+      role: "Founder",
       image: "placeholder",
     },
     {
-      name: "Mr. Chetan Ahire",
-      role: "Technical Director (B.E Computer Engineering)",
+      name: "Mr.Pramod S. Aswale",
+      role: "CEO",
       image: "placeholder",
     },
     {
