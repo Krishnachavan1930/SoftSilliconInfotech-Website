@@ -74,8 +74,8 @@ export default function ContactUsPage() {
       title: "Main Office",
       icon: <MapPin size={24} className="text-accent" />,
       lines: [
-        "Office No 106, 2nd Floor, Abhonkar Lane,",
-        "Raviwar Karanja, Panchavati, Nashik 422003",
+        "410, 4th Floor, Silicon Business Centre,",
+        "Guru Gobind Singh College Road, near Pathardi Gaon, Pandav Nagari, Circle, Nashik, Maharashtra 422010",
       ],
       href: "#",
     },
