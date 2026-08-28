@@ -315,11 +315,11 @@ export default function Navbar() {
                   Internship
                 </Link>
                 <div className="flex flex-col space-y-2 pt-4 border-t border-slate-100 text-xs text-slate-500">
-                  <a href="tel:+919665819110" className="flex items-center space-x-2">
+                  <a href="tel:+918411907864" className="flex items-center space-x-2">
                     <Phone size={14} className="text-primary" />
                     <span>+91 8411907864</span>
                   </a>
-                  <a href="mailto:info@SiliconSoftsolutions.in" className="flex items-center space-x-2">
+                  <a href="mailto:info@softsiliconinfotech.com" className="flex items-center space-x-2">
                     <Mail size={14} className="text-primary" />
                     <span>info@softsiliconinfotech.com</span>
                   </a>
