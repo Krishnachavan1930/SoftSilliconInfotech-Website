@@ -1,0 +1,91 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --font-sans: 'Inter', sans-serif;
+    --font-heading: 'Outfit', sans-serif;
+  }
+  
+  html {
+    scroll-behavior: auto;
+    font-family: var(--font-sans);
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 transition-colors duration-200 antialiased overflow-x-hidden;
+  }
+
+  /* Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-slate-300 rounded-full border-2 border-slate-100 hover:bg-slate-400;
+  }
+
+  /* Accessibility Focus Outline */
+  *:focus-visible {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center px-6 py-3 rounded-lg font-medium transition-all duration-300 transform active:scale-95;
+  }
+  
+  .btn-primary {
+    @apply btn bg-primary text-white hover:bg-primary-dark hover:shadow-lg hover:shadow-primary/20;
+  }
+  
+  .btn-secondary {
+    @apply btn bg-secondary text-white hover:bg-secondary-dark hover:shadow-lg hover:shadow-secondary/20;
+  }
+  
+  .btn-accent {
+    @apply btn bg-accent text-white hover:bg-accent-dark hover:shadow-lg hover:shadow-accent/20;
+  }
+  
+  .btn-outline {
+    @apply btn border border-slate-300 hover:bg-slate-50 hover:border-slate-400;
+  }
+
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-sm rounded-2xl;
+  }
+
+  .nav-link-dropdown {
+    @apply block w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 hover:text-primary transition-colors;
+  }
+}
+
+/* Custom styles for Swiper pagination & controls */
+.swiper-pagination-bullet-active {
+  @apply bg-primary !important;
+}
+
+/* Lenis scroll */
+html.lenis {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overflow: clip;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
