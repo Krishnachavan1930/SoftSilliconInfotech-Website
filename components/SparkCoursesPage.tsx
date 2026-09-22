@@ -1,13 +1,7 @@
 "use client";
 
-import React, {
-  Suspense,
-  useEffect,
-  useState,
-} from "react";
-
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -21,26 +15,22 @@ import {
   Palette,
   CheckCircle2,
   Clock,
-  Award,
   ArrowRight,
   GraduationCap,
   Send,
   Laptop,
   Target,
+  Award,
 } from "lucide-react";
 
-import {
-  useRouter,
-  useSearchParams,
-} from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import BlogsPage from "@/app/blogs.php/page";
 import ContactPage from "@/app/contactus.php/page";
 
-
-// ============================================================
-// FORM VALIDATION
-// ============================================================
+/* ============================================================
+   FORM VALIDATION
+============================================================ */
 
 const applyFormSchema = z.object({
   name: z
@@ -72,14 +62,11 @@ const applyFormSchema = z.object({
     .optional(),
 });
 
-type ApplyFormValues = z.infer<
-  typeof applyFormSchema
->;
+type ApplyFormValues = z.infer<typeof applyFormSchema>;
 
-
-// ============================================================
-// COURSE INTERFACE
-// ============================================================
+/* ============================================================
+   COURSE TYPE
+============================================================ */
 
 interface Course {
   id: string;
@@ -108,18 +95,25 @@ interface Course {
   icon: React.ReactNode;
 }
 
+/* ============================================================
+   MAIN SPARK COMPONENT
+============================================================ */
 
-// ============================================================
-// SPARK CONTENT COMPONENT
-// ============================================================
-
-function SparkCoursesContent() {
+export default function SparkCoursesPage() {
   const router = useRouter();
 
   const searchParams = useSearchParams();
 
+  /* ==========================================================
+     CATEGORY
+  ========================================================== */
+
   const [activeCategory, setActiveCategory] =
     useState<string>("all");
+
+  /* ==========================================================
+     SUBMIT STATES
+  ========================================================== */
 
   const [isSubmitting, setIsSubmitting] =
     useState(false);
@@ -130,10 +124,9 @@ function SparkCoursesContent() {
   const [submitError, setSubmitError] =
     useState("");
 
-
-  // ==========================================================
-  // SPARK SECTIONS
-  // ==========================================================
+  /* ==========================================================
+     SPARK SECTIONS
+  ========================================================== */
 
   type SparkSection =
     | "courses"
@@ -141,15 +134,12 @@ function SparkCoursesContent() {
     | "contact"
     | "apply";
 
-  const [
-    activeSparkSection,
-    setActiveSparkSection,
-  ] = useState<SparkSection>("courses");
+  const [activeSparkSection, setActiveSparkSection] =
+    useState<SparkSection>("courses");
 
-
-  // ==========================================================
-  // REACT HOOK FORM
-  // ==========================================================
+  /* ==========================================================
+     FORM
+  ========================================================== */
 
   const {
     register,
@@ -158,31 +148,26 @@ function SparkCoursesContent() {
     reset,
     formState: { errors },
   } = useForm<ApplyFormValues>({
-    resolver: zodResolver(
-      applyFormSchema
-    ),
+    resolver: zodResolver(applyFormSchema),
 
     defaultValues: {
       name: "",
-
       email: "",
-
       phone: "",
-
       program: "full-stack",
-
       location: "nashik",
-
       duration: "3-months",
-
       areaOfInterest: "",
     },
   });
 
+  /* ==========================================================
+     READ SECTION + PROGRAM FROM URL
 
-  // ==========================================================
-  // URL SECTION HANDLER
-  // ==========================================================
+     Example:
+
+     /spark?section=apply&program=ai-ml
+  ========================================================== */
 
   useEffect(() => {
     const validSections: SparkSection[] = [
@@ -192,51 +177,37 @@ function SparkCoursesContent() {
       "apply",
     ];
 
-    const section =
-      searchParams.get("section") as
-        | SparkSection
-        | null;
+    const sectionParam =
+      searchParams.get("section");
 
-    const nextSection =
-      section &&
-      validSections.includes(section)
-        ? section
+    const programParam =
+      searchParams.get("program");
+
+    const nextSection: SparkSection =
+      sectionParam &&
+      validSections.includes(
+        sectionParam as SparkSection
+      )
+        ? (sectionParam as SparkSection)
         : "courses";
 
-    setActiveSparkSection(
-      nextSection
-    );
+    setActiveSparkSection(nextSection);
 
+    /* Set selected program when opening Apply */
+    if (programParam) {
+      setValue("program", programParam);
+    }
+
+    /* Scroll to top whenever section changes */
     window.scrollTo({
       top: 0,
       behavior: "smooth",
     });
-  }, [searchParams]);
+  }, [searchParams, setValue]);
 
-
-  // ==========================================================
-  // AUTO SELECT PROGRAM FROM URL
-  // ==========================================================
-
-  useEffect(() => {
-    const program =
-      searchParams.get("program");
-
-    if (program) {
-      setValue(
-        "program",
-        program
-      );
-    }
-  }, [
-    searchParams,
-    setValue,
-  ]);
-
-
-  // ==========================================================
-  // COURSES
-  // ==========================================================
+  /* ============================================================
+     COURSES
+  ============================================================ */
 
   const courses: Course[] = [
     {
@@ -275,7 +246,6 @@ function SparkCoursesContent() {
       ),
     },
 
-
     {
       id: "ai-ml",
 
@@ -311,7 +281,6 @@ function SparkCoursesContent() {
         />
       ),
     },
-
 
     {
       id: "react-next",
@@ -349,7 +318,6 @@ function SparkCoursesContent() {
       ),
     },
 
-
     {
       id: "mobile-apps",
 
@@ -385,7 +353,6 @@ function SparkCoursesContent() {
         />
       ),
     },
-
 
     {
       id: "cyber-security",
@@ -423,7 +390,6 @@ function SparkCoursesContent() {
       ),
     },
 
-
     {
       id: "cloud-devops",
 
@@ -460,7 +426,6 @@ function SparkCoursesContent() {
       ),
     },
 
-
     {
       id: "data-science",
 
@@ -496,7 +461,6 @@ function SparkCoursesContent() {
         />
       ),
     },
-
 
     {
       id: "ui-ux",
@@ -535,35 +499,37 @@ function SparkCoursesContent() {
     },
   ];
 
-
-  // ==========================================================
-  // FILTER COURSES
-  // ==========================================================
+  /* ============================================================
+     FILTER COURSES
+  ============================================================ */
 
   const filteredCourses =
     activeCategory === "all"
       ? courses
       : courses.filter(
           (course) =>
-            course.category ===
-            activeCategory
+            course.category === activeCategory
         );
 
+  /* ============================================================
+     APPLY BUTTON
 
-  // ==========================================================
-  // APPLY BUTTON
-  // ==========================================================
+     IMPORTANT:
+     The old code only used scrollIntoView().
+     But the Apply section was not rendered.
+
+     This changes the URL to:
+
+     /spark?section=apply&program=full-stack
+
+     Therefore the Apply section becomes visible.
+  ============================================================ */
 
   const handleApplyClick = (
     courseId: string
   ) => {
-    // Set selected program immediately
-    setValue(
-      "program",
-      courseId
-    );
+    setValue("program", courseId);
 
-    // Open Apply section
     router.push(
       `/spark?section=apply&program=${encodeURIComponent(
         courseId
@@ -571,10 +537,9 @@ function SparkCoursesContent() {
     );
   };
 
-
-  // ==========================================================
-  // SUBMIT FORM
-  // ==========================================================
+  /* ============================================================
+     SUBMIT FORM
+  ============================================================ */
 
   const onSubmit = async (
     data: ApplyFormValues
@@ -584,23 +549,22 @@ function SparkCoursesContent() {
     setSubmitError("");
 
     try {
-      const response =
-        await fetch(
-          "/api/forms",
-          {
-            method: "POST",
+      const response = await fetch(
+        "/api/forms",
+        {
+          method: "POST",
 
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
+          headers: {
+            "Content-Type":
+              "application/json",
+          },
 
-            body: JSON.stringify({
-              form: "apply",
-              data,
-            }),
-          }
-        );
+          body: JSON.stringify({
+            form: "apply",
+            data,
+          }),
+        }
+      );
 
       const result =
         await response.json();
@@ -618,19 +582,15 @@ function SparkCoursesContent() {
         name: "",
         email: "",
         phone: "",
-        program:
-          data.program || "full-stack",
-        location:
-          data.location || "nashik",
-        duration:
-          data.duration || "3-months",
+        program: data.program,
+        location: "nashik",
+        duration: "3-months",
         areaOfInterest: "",
       });
 
       setTimeout(() => {
         setSubmitSuccess(false);
       }, 6000);
-
     } catch (error) {
       setSubmitError(
         error instanceof Error
@@ -642,29 +602,23 @@ function SparkCoursesContent() {
     }
   };
 
-
-  // ==========================================================
-  // RENDER
-  // ==========================================================
+  /* ============================================================
+     RENDER
+  ============================================================ */
 
   return (
     <div className="space-y-0 bg-slate-50 min-h-screen">
-
 
       {/* ======================================================
           COURSES SECTION
       ====================================================== */}
 
-      {activeSparkSection ===
-        "courses" && (
-
+      {activeSparkSection === "courses" && (
         <section
           id="courses"
           className="py-24 bg-white relative"
         >
-
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-
 
             {/* HEADER */}
 
@@ -679,15 +633,14 @@ function SparkCoursesContent() {
               </h2>
 
               <p className="text-slate-500 mt-3 text-sm sm:text-base leading-relaxed">
-                Explore our structured career tracks designed in sync with current IT industry benchmarks.
+                Explore our structured career tracks
+                designed in sync with current IT
+                industry benchmarks.
               </p>
 
             </div>
 
-
-            {/* ==================================================
-                CATEGORY TABS
-            ================================================== */}
+            {/* CATEGORY FILTER */}
 
             <div className="flex flex-wrap justify-center gap-2 mb-12">
 
@@ -696,27 +649,22 @@ function SparkCoursesContent() {
                   id: "all",
                   label: "All Courses",
                 },
-
                 {
                   id: "web",
                   label: "Web & Full Stack",
                 },
-
                 {
                   id: "ai",
                   label: "AI & Data Science",
                 },
-
                 {
                   id: "mobile",
                   label: "Mobile Apps",
                 },
-
                 {
                   id: "cloud",
                   label: "Cloud & Security",
                 },
-
                 {
                   id: "design",
                   label: "UI/UX & Design",
@@ -727,13 +675,10 @@ function SparkCoursesContent() {
                   key={tab.id}
                   type="button"
                   onClick={() =>
-                    setActiveCategory(
-                      tab.id
-                    )
+                    setActiveCategory(tab.id)
                   }
                   className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-                    activeCategory ===
-                    tab.id
+                    activeCategory === tab.id
                       ? "bg-red-600 text-white shadow-md shadow-red-600/20"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
@@ -745,18 +690,12 @@ function SparkCoursesContent() {
 
             </div>
 
-
-            {/* ==================================================
-                COURSES GRID
-            ================================================== */}
+            {/* COURSE GRID */}
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
               {filteredCourses.map(
-                (
-                  course,
-                  idx
-                ) => (
+                (course, idx) => (
 
                   <motion.div
                     key={course.id}
@@ -773,14 +712,12 @@ function SparkCoursesContent() {
                     }}
                     transition={{
                       duration: 0.4,
-                      delay:
-                        idx * 0.05,
+                      delay: idx * 0.05,
                     }}
                     className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 flex flex-col justify-between hover:shadow-xl hover:border-red-300 transition-all group"
                   >
 
                     <div className="space-y-4">
-
 
                       {/* CARD HEADER */}
 
@@ -796,7 +733,6 @@ function SparkCoursesContent() {
 
                       </div>
 
-
                       {/* TITLE */}
 
                       <div>
@@ -811,7 +747,6 @@ function SparkCoursesContent() {
 
                       </div>
 
-
                       {/* SKILLS */}
 
                       <div className="space-y-1.5 pt-2">
@@ -823,10 +758,7 @@ function SparkCoursesContent() {
                         <div className="flex flex-wrap gap-1.5">
 
                           {course.skills.map(
-                            (
-                              skill,
-                              i
-                            ) => (
+                            (skill, i) => (
 
                               <span
                                 key={i}
@@ -842,8 +774,7 @@ function SparkCoursesContent() {
 
                       </div>
 
-
-                      {/* DURATION */}
+                      {/* COURSE INFO */}
 
                       <div className="grid grid-cols-2 gap-2 pt-3 border-t border-slate-200/60 text-xs text-slate-600">
 
@@ -859,7 +790,6 @@ function SparkCoursesContent() {
                           </span>
 
                         </div>
-
 
                         <div className="flex items-center space-x-1.5">
 
@@ -878,10 +808,7 @@ function SparkCoursesContent() {
 
                     </div>
 
-
-                    {/* ==================================================
-                        APPLY BUTTON
-                    ================================================== */}
+                    {/* APPLY BUTTON */}
 
                     <div className="pt-6">
 
@@ -915,26 +842,20 @@ function SparkCoursesContent() {
             </div>
 
           </div>
-
         </section>
-
       )}
 
-
       {/* ======================================================
-          APPLY FORM SECTION
+          APPLY FORM
       ====================================================== */}
 
-      {activeSparkSection ===
-        "apply" && (
-
+      {activeSparkSection === "apply" && (
         <section
           id="apply-query-section"
           className="py-24 bg-slate-50 relative border-t border-slate-200"
         >
 
-
-          {/* BANNER */}
+          {/* HEADING */}
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
 
@@ -948,25 +869,21 @@ function SparkCoursesContent() {
 
           </div>
 
-
-          {/* MAIN CONTAINER */}
+          {/* FORM + VISUAL */}
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start relative">
-
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
 
               {/* ==================================================
-                  LEFT FORM
+                  FORM
               ================================================== */}
 
-              <div className="lg:col-span-6 bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-md relative">
-
+              <div className="lg:col-span-6 bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-md">
 
                 {/* SUCCESS */}
 
                 {submitSuccess && (
-
                   <div className="bg-emerald-50 border border-emerald-300 text-emerald-800 p-5 rounded-xl flex items-start space-x-3 mb-6">
 
                     <CheckCircle2
@@ -981,36 +898,29 @@ function SparkCoursesContent() {
                       </h4>
 
                       <p className="text-xs text-emerald-700 mt-1 leading-relaxed">
-                        Thank you for applying to the SiliconSoft SPARK Program. Our technical counselor will reach out to you shortly.
+                        Thank you for applying to the
+                        SiliconSoft SPARK Program.
+                        Our technical counselor will
+                        reach out to you shortly.
                       </p>
 
                     </div>
 
                   </div>
-
                 )}
-
 
                 {/* ERROR */}
 
                 {submitError && (
-
                   <div className="bg-rose-50 border border-rose-200 text-rose-700 p-4 rounded-xl text-xs sm:text-sm mb-6">
                     {submitError}
                   </div>
-
                 )}
 
-
-                {/* FORM */}
-
                 <form
-                  onSubmit={handleSubmit(
-                    onSubmit
-                  )}
+                  onSubmit={handleSubmit(onSubmit)}
                   className="space-y-4 text-slate-700"
                 >
-
 
                   {/* NAME */}
 
@@ -1022,24 +932,18 @@ function SparkCoursesContent() {
 
                     <input
                       type="text"
-                      {...register(
-                        "name"
-                      )}
+                      {...register("name")}
                       placeholder="Enter your name here"
                       className="w-full bg-slate-50/70 border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#0b5ed7] focus:ring-1 focus:ring-[#0b5ed7] outline-none transition-all"
                     />
 
                     {errors.name && (
                       <p className="text-rose-500 text-xs font-semibold">
-                        {
-                          errors.name
-                            .message
-                        }
+                        {errors.name.message}
                       </p>
                     )}
 
                   </div>
-
 
                   {/* EMAIL */}
 
@@ -1051,24 +955,18 @@ function SparkCoursesContent() {
 
                     <input
                       type="email"
-                      {...register(
-                        "email"
-                      )}
+                      {...register("email")}
                       placeholder="name@example.com"
                       className="w-full bg-slate-50/70 border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#0b5ed7] focus:ring-1 focus:ring-[#0b5ed7] outline-none transition-all"
                     />
 
                     {errors.email && (
                       <p className="text-rose-500 text-xs font-semibold">
-                        {
-                          errors.email
-                            .message
-                        }
+                        {errors.email.message}
                       </p>
                     )}
 
                   </div>
-
 
                   {/* PHONE */}
 
@@ -1080,24 +978,18 @@ function SparkCoursesContent() {
 
                     <input
                       type="tel"
-                      {...register(
-                        "phone"
-                      )}
+                      {...register("phone")}
                       placeholder="Enter your number here"
                       className="w-full bg-slate-50/70 border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:border-[#0b5ed7] focus:ring-1 focus:ring-[#0b5ed7] outline-none transition-all"
                     />
 
                     {errors.phone && (
                       <p className="text-rose-500 text-xs font-semibold">
-                        {
-                          errors.phone
-                            .message
-                        }
+                        {errors.phone.message}
                       </p>
                     )}
 
                   </div>
-
 
                   {/* PROGRAM */}
 
@@ -1108,9 +1000,7 @@ function SparkCoursesContent() {
                     </label>
 
                     <select
-                      {...register(
-                        "program"
-                      )}
+                      {...register("program")}
                       className="w-full bg-slate-50/70 border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-800 focus:bg-white focus:border-[#0b5ed7] focus:ring-1 focus:ring-[#0b5ed7] outline-none transition-all cursor-pointer"
                     >
 
@@ -1158,15 +1048,11 @@ function SparkCoursesContent() {
 
                     {errors.program && (
                       <p className="text-rose-500 text-xs font-semibold">
-                        {
-                          errors.program
-                            .message
-                        }
+                        {errors.program.message}
                       </p>
                     )}
 
                   </div>
-
 
                   {/* LOCATION */}
 
@@ -1177,9 +1063,7 @@ function SparkCoursesContent() {
                     </label>
 
                     <select
-                      {...register(
-                        "location"
-                      )}
+                      {...register("location")}
                       className="w-full bg-slate-50/70 border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-800 focus:bg-white focus:border-[#0b5ed7] focus:ring-1 focus:ring-[#0b5ed7] outline-none transition-all cursor-pointer"
                     >
 
@@ -1207,15 +1091,11 @@ function SparkCoursesContent() {
 
                     {errors.location && (
                       <p className="text-rose-500 text-xs font-semibold">
-                        {
-                          errors.location
-                            .message
-                        }
+                        {errors.location.message}
                       </p>
                     )}
 
                   </div>
-
 
                   {/* DURATION */}
 
@@ -1226,9 +1106,7 @@ function SparkCoursesContent() {
                     </label>
 
                     <select
-                      {...register(
-                        "duration"
-                      )}
+                      {...register("duration")}
                       className="w-full bg-slate-50/70 border border-slate-200 px-4 py-2.5 rounded-lg text-sm text-slate-800 focus:bg-white focus:border-[#0b5ed7] focus:ring-1 focus:ring-[#0b5ed7] outline-none transition-all cursor-pointer"
                     >
 
@@ -1260,22 +1138,18 @@ function SparkCoursesContent() {
 
                     {errors.duration && (
                       <p className="text-rose-500 text-xs font-semibold">
-                        {
-                          errors.duration
-                            .message
-                        }
+                        {errors.duration.message}
                       </p>
                     )}
 
                   </div>
-
 
                   {/* AREA OF INTEREST */}
 
                   <div className="space-y-1">
 
                     <label className="text-xs font-bold text-[#0b5ed7] uppercase tracking-wider block">
-                      Area of Interest*
+                      Area of Interest
                     </label>
 
                     <textarea
@@ -1289,37 +1163,26 @@ function SparkCoursesContent() {
 
                   </div>
 
-
                   {/* SUBMIT */}
 
                   <button
                     type="submit"
-                    disabled={
-                      isSubmitting
-                    }
+                    disabled={isSubmitting}
                     className="w-full mt-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg text-sm transition-all duration-200 shadow-md shadow-red-600/25 flex items-center justify-center space-x-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
 
                     {isSubmitting ? (
-
                       <span>
                         Submitting Query...
                       </span>
-
                     ) : (
-
                       <>
-
                         <span>
                           Apply Now & Submit Query
                         </span>
 
-                        <Send
-                          size={16}
-                        />
-
+                        <Send size={16} />
                       </>
-
                     )}
 
                   </button>
@@ -1328,37 +1191,25 @@ function SparkCoursesContent() {
 
               </div>
 
-
               {/* ==================================================
-                  RIGHT SIDE DESIGN
+                  RIGHT VISUAL
               ================================================== */}
 
               <div className="lg:col-span-6 relative flex flex-col items-center justify-center min-h-[480px]">
 
                 <div className="relative w-full max-w-[480px] h-[480px] sm:h-[520px] flex items-center justify-center">
 
+                  {/* RINGS */}
 
-                  {/* OUTER CIRCLE */}
+                  <div className="absolute w-[440px] h-[440px] rounded-full border-[18px] border-slate-300/40 bg-slate-200/20" />
 
-                  <div className="absolute w-[440px] h-[440px] max-w-[90%] max-h-[90%] rounded-full border-[18px] border-slate-300/40 bg-slate-200/20" />
+                  <div className="absolute w-[360px] h-[360px] rounded-full border-[20px] border-slate-400/40 bg-slate-700/30" />
 
+                  <div className="absolute w-[280px] h-[280px] rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 shadow-2xl flex items-center justify-center" />
 
-                  {/* MIDDLE CIRCLE */}
-
-                  <div className="absolute w-[360px] h-[360px] max-w-[75%] max-h-[75%] rounded-full border-[20px] border-slate-400/40 bg-slate-700/30" />
-
-
-                  {/* INNER CIRCLE */}
-
-                  <div className="absolute w-[280px] h-[280px] max-w-[60%] max-h-[60%] rounded-full bg-gradient-to-tr from-slate-900 via-slate-800 to-slate-700 shadow-2xl flex items-center justify-center" />
-
-
-                  {/* CONTENT */}
+                  {/* CENTER */}
 
                   <div className="relative z-10 flex flex-col items-center justify-center text-center p-6">
-
-
-                    {/* AVATAR */}
 
                     <div className="relative mb-4">
 
@@ -1381,7 +1232,6 @@ function SparkCoursesContent() {
 
                       </div>
 
-
                       {/* LIVE WORK */}
 
                       <div className="absolute -bottom-2 -left-4 bg-white text-slate-900 border border-slate-200 px-3 py-1.5 rounded-xl shadow-lg flex items-center space-x-1.5 text-xs font-bold">
@@ -1396,7 +1246,6 @@ function SparkCoursesContent() {
                         </span>
 
                       </div>
-
 
                       {/* CERTIFIED */}
 
@@ -1415,8 +1264,7 @@ function SparkCoursesContent() {
 
                     </div>
 
-
-                    {/* DESCRIPTION */}
+                    {/* TEXT */}
 
                     <div className="space-y-2 max-w-sm mt-4 bg-white/90 backdrop-blur-md p-4 rounded-2xl border border-slate-200 shadow-sm">
 
@@ -1425,7 +1273,10 @@ function SparkCoursesContent() {
                       </h3>
 
                       <p className="text-xs text-slate-500 leading-relaxed">
-                        Gain hands-on coding experience on commercial web & mobile frameworks with 1-on-1 expert developer guidance.
+                        Gain hands-on coding experience
+                        on commercial web & mobile
+                        frameworks with 1-on-1 expert
+                        developer guidance.
                       </p>
 
                     </div>
@@ -1441,72 +1292,34 @@ function SparkCoursesContent() {
           </div>
 
         </section>
-
       )}
 
-
       {/* ======================================================
-          BLOG SECTION
+          BLOG
       ====================================================== */}
 
-      {activeSparkSection ===
-        "blog" && (
-
+      {activeSparkSection === "blog" && (
         <section
           id="spark-blog"
           className="scroll-mt-24 bg-white"
         >
           <BlogsPage />
         </section>
-
       )}
 
-
       {/* ======================================================
-          CONTACT SECTION
+          CONTACT
       ====================================================== */}
 
-      {activeSparkSection ===
-        "contact" && (
-
+      {activeSparkSection === "contact" && (
         <section
           id="spark-contact"
           className="scroll-mt-24 bg-white"
         >
           <ContactPage />
         </section>
-
       )}
 
     </div>
-  );
-}
-
-
-// ============================================================
-// NEXT.JS PAGE WITH SUSPENSE
-// ============================================================
-
-export default function SparkCoursesPage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen flex items-center justify-center bg-slate-50">
-
-          <div className="text-center">
-
-            <div className="w-10 h-10 border-4 border-slate-200 border-t-red-600 rounded-full animate-spin mx-auto mb-4" />
-
-            <p className="text-sm font-medium text-slate-500">
-              Loading SPARK...
-            </p>
-
-          </div>
-
-        </div>
-      }
-    >
-      <SparkCoursesContent />
-    </Suspense>
   );
 }

@@ -3,9 +3,20 @@
 import React, { useState } from "react";
 import PageBanner from "@/components/ui/PageBanner";
 import { Mail, Phone, MapPin, Send, CheckCircle2 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+
+// Leaflet map is loaded only on the client to avoid Next.js SSR/build errors.
+const OfficeMap = dynamic(() => import("@/components/OfficeMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center bg-slate-100">
+      <p className="text-sm text-slate-500">Loading office map...</p>
+    </div>
+  ),
+});
 
 const contactFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -233,17 +244,9 @@ export default function ContactUsPage() {
                 </div>
               </div>
 
-              {/* Map box */}
+              {/* Office Map */}
               <div className="relative w-full h-[320px] rounded-3xl overflow-hidden border border-slate-100 shadow-sm bg-slate-100">
-                <iframe
-                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m13!1m8!1m3!1d3749.030588636733!2d73.785055!3d20.007174!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bddeedf0ffaaaaa%3A0xe6bf44b7d598285!2sNP%20IT%20SOLUTIONS%20-%20Best%20Software%20Development%20%26%20IT%20Services%20Nashik!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0 }}
-                  allowFullScreen
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                ></iframe>
+                <OfficeMap />
               </div>
             </div>
 
