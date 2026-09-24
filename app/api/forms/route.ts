@@ -1,74 +1,67 @@
-
 import { NextResponse } from "next/server";
 import nodemailer from "nodemailer";
 import { z } from "zod";
 
-// ============================================================
-// CONTACT FORM VALIDATION
-// ============================================================
+/* ============================================================
+   CONTACT FORM VALIDATION
+============================================================ */
 
 const contactSchema = z.object({
-  name: z.string().min(2),
-  email: z.string().email(),
-  phone: z.string().min(10),
-  subject: z.string().min(3),
-  message: z.string().min(10),
+  name: z.string().min(2, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone number is required"),
+  subject: z.string().min(3, "Subject is required"),
+  message: z.string().min(10, "Message is required"),
 });
 
-// ============================================================
-// INTERNSHIP FORM VALIDATION
-// ============================================================
+/* ============================================================
+   INTERNSHIP FORM VALIDATION
+============================================================ */
 
 const internshipSchema = z.object({
-  fullName: z.string().min(2),
-  email: z.string().email(),
-  phone: z.string().min(10),
-  collegeName: z.string().min(3),
-  university: z.string().min(3),
-  course: z.string().min(2),
-  year: z.string().min(1),
-  domain: z.string().min(2),
-
-  // Resume link is now OPTIONAL.
-  // User can either provide a link OR upload a file.
-  resumeLink: z
-    .string()
-    .optional()
-    .or(z.literal("")),
-
+  fullName: z.string().min(2, "Name is required"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().min(10, "Phone number is required"),
+  collegeName: z.string().min(3, "College name is required"),
+  university: z.string().min(3, "University is required"),
+  course: z.string().min(2, "Course is required"),
+  year: z.string().min(1, "Year is required"),
+  domain: z.string().min(2, "Domain is required"),
+  resumeLink: z.string().optional().or(z.literal("")),
   message: z.string().optional(),
 });
 
-// ============================================================
-// APPLY / SPARK FORM VALIDATION
-// ============================================================
+/* ============================================================
+   APPLY FORM VALIDATION
+============================================================ */
 
 const applySchema = z.object({
-  name: z.string().min(2, "Name must be at least 2 characters"),
+  name: z.string().min(2, "Name is required"),
   email: z.string().email("Invalid email address"),
-  phone: z
-    .string()
-    .min(10, "Phone number must be at least 10 digits"),
-  program: z.string().min(2, "Please select a program"),
-  location: z.string().min(2, "Please select a location"),
-  duration: z.string().min(2, "Please select a duration"),
+  phone: z.string().min(10, "Phone number is required"),
+  program: z.string().min(2, "Program is required"),
+  location: z.string().min(2, "Location is required"),
+  duration: z.string().min(2, "Duration is required"),
   areaOfInterest: z.string().optional(),
 });
 
-// ============================================================
-// HELPER FUNCTIONS
-// ============================================================
+/* ============================================================
+   HELPER FUNCTION
+============================================================ */
 
-function getString(
-  formData: FormData,
-  key: string
-): string {
+function getString(formData: FormData, key: string): string {
   const value = formData.get(key);
 
-  return typeof value === "string"
-    ? value.trim()
-    : "";
+  if (typeof value === "string") {
+    return value.trim();
+  }
+
+  return "";
 }
+
+/* ============================================================
+   SMTP TRANSPORTER
+============================================================ */
 
 function getTransporter() {
   const user = process.env.SMTP_USER;
@@ -76,7 +69,7 @@ function getTransporter() {
 
   if (!user || !password) {
     throw new Error(
-      "SMTP_USER and SMTP_APP_PASSWORD are not configured"
+      "SMTP_USER and SMTP_APP_PASSWORD are not configured in .env.local"
     );
   }
 
@@ -89,95 +82,43 @@ function getTransporter() {
   });
 }
 
-function userAddress() {
-  const user = process.env.SMTP_USER;
+/* ============================================================
+   POST API
+============================================================ */
 
-  if (!user) {
-    throw new Error(
-      "SMTP_USER is not configured"
-    );
-  }
-
-  return user;
-}
-
-// ============================================================
-// FILE VALIDATION
-// ============================================================
-
-function validateResumeFile(
-  file: File
-): string | null {
-
-  const allowedMimeTypes = [
-    "application/pdf",
-
-    "application/msword",
-
-    "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-  ];
-
-  const allowedExtensions = [
-    ".pdf",
-    ".doc",
-    ".docx",
-  ];
-
-  const fileName =
-    file.name.toLowerCase();
-
-  const hasValidExtension =
-    allowedExtensions.some((extension) =>
-      fileName.endsWith(extension)
-    );
-
-  const hasValidMimeType =
-    allowedMimeTypes.includes(file.type);
-
-  if (
-    !hasValidExtension ||
-    !hasValidMimeType
-  ) {
-    return "Only PDF, DOC, and DOCX resume files are allowed.";
-  }
-
-  // Maximum 5 MB
-  const maxFileSize =
-    5 * 1024 * 1024;
-
-  if (file.size > maxFileSize) {
-    return "Resume file must be smaller than 5 MB.";
-  }
-
-  if (file.size === 0) {
-    return "The uploaded resume file is empty.";
-  }
-
-  return null;
-}
-
-// ============================================================
-// POST API
-// ============================================================
-
-export async function POST(
-  request: Request
-) {
+export async function POST(request: Request) {
   try {
+    const contentType = request.headers.get("content-type") || "";
 
-    // ========================================================
-    // READ FORM DATA
-    // ========================================================
+    let formData: FormData;
 
-    const formData =
-      await request.formData();
+    /*
+     * CONTACT FORM CAN SEND JSON
+     */
 
-    // ========================================================
-    // DETERMINE FORM TYPE
-    // ========================================================
+    if (contentType.includes("application/json")) {
+      const body = await request.json();
 
-    const form =
-      getString(formData, "form");
+      formData = new FormData();
+
+      formData.append("form", body.form || "");
+
+      if (body.data) {
+        Object.entries(body.data).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            formData.append(key, String(value));
+          }
+        });
+      }
+    } else {
+      /*
+       * INTERNSHIP / APPLY FORM CAN SEND FORMDATA
+       */
+
+      formData = await request.formData();
+    }
+
+    const form = getString(formData, "form");
 
     if (
       form !== "contact" &&
@@ -186,18 +127,12 @@ export async function POST(
     ) {
       return NextResponse.json(
         {
-          error:
-            "Invalid form type.",
+          success: false,
+          error: "Invalid form type",
         },
-        {
-          status: 400,
-        }
+        { status: 400 }
       );
     }
-
-    // ========================================================
-    // RECIPIENT
-    // ========================================================
 
     const recipient =
       process.env.FORM_RECIPIENT_EMAIL ||
@@ -209,441 +144,226 @@ export async function POST(
       );
     }
 
-    // ========================================================
-    // TRANSPORTER
-    // ========================================================
-
-    const transporter =
-      getTransporter();
+    const transporter = getTransporter();
 
     let subject = "";
     let text = "";
-    let replyToEmail = "";
+    let replyTo = "";
 
-    // ========================================================
-    // CONTACT FORM
-    // ========================================================
+    /* ============================================================
+       CONTACT FORM
+    ============================================================ */
 
     if (form === "contact") {
-
       const data = {
-        name: getString(
-          formData,
-          "name"
-        ),
-
-        email: getString(
-          formData,
-          "email"
-        ),
-
-        phone: getString(
-          formData,
-          "phone"
-        ),
-
-        subject: getString(
-          formData,
-          "subject"
-        ),
-
-        message: getString(
-          formData,
-          "message"
-        ),
+        name: getString(formData, "name"),
+        email: getString(formData, "email"),
+        phone: getString(formData, "phone"),
+        subject: getString(formData, "subject"),
+        message: getString(formData, "message"),
       };
 
-      // Validate
-      contactSchema.parse(data);
+      const validation = contactSchema.safeParse(data);
 
-      subject =
-        `Website contact: ${data.subject}`;
-
-      replyToEmail =
-        data.email;
-
-      text = [
-        `Name: ${data.name}`,
-        `Email: ${data.email}`,
-        `Phone: ${data.phone}`,
-        `Subject: ${data.subject}`,
-        "",
-        data.message,
-      ].join("\n");
-    }
-
-    // ========================================================
-    // INTERNSHIP FORM
-    // ========================================================
-
-    else if (
-      form === "internship"
-    ) {
-
-      // ------------------------------------------------------
-      // GET TEXT DATA
-      // ------------------------------------------------------
-
-      const data = {
-        fullName: getString(
-          formData,
-          "fullName"
-        ),
-
-        email: getString(
-          formData,
-          "email"
-        ),
-
-        phone: getString(
-          formData,
-          "phone"
-        ),
-
-        collegeName: getString(
-          formData,
-          "collegeName"
-        ),
-
-        university: getString(
-          formData,
-          "university"
-        ),
-
-        course: getString(
-          formData,
-          "course"
-        ),
-
-        year: getString(
-          formData,
-          "year"
-        ),
-
-        domain: getString(
-          formData,
-          "domain"
-        ),
-
-        resumeLink: getString(
-          formData,
-          "resumeLink"
-        ),
-
-        message: getString(
-          formData,
-          "message"
-        ),
-      };
-
-      // ------------------------------------------------------
-      // VALIDATE TEXT DATA
-      // ------------------------------------------------------
-
-      internshipSchema.parse(data);
-
-      // ------------------------------------------------------
-      // GET UPLOADED RESUME
-      // ------------------------------------------------------
-
-      const resumeValue =
-        formData.get("resume");
-
-      let resumeFile:
-        | File
-        | null = null;
-
-      if (
-        resumeValue instanceof File &&
-        resumeValue.size > 0
-      ) {
-        resumeFile =
-          resumeValue;
-      }
-
-      // ------------------------------------------------------
-      // REQUIRE LINK OR FILE
-      // ------------------------------------------------------
-
-      if (
-        !data.resumeLink &&
-        !resumeFile
-      ) {
+      if (!validation.success) {
         return NextResponse.json(
           {
-            error:
-              "Please provide a resume link or upload your resume.",
+            success: false,
+            error: "Please fill all fields correctly.",
+            details: validation.error.issues,
           },
-          {
-            status: 400,
-          }
+          { status: 400 }
         );
       }
 
-      // ------------------------------------------------------
-      // VALIDATE RESUME FILE
-      // ------------------------------------------------------
+      subject = `Website Contact: ${data.subject}`;
+      replyTo = data.email;
 
-      if (resumeFile) {
+      text = `
+NEW CONTACT FORM SUBMISSION
 
-        const fileError =
-          validateResumeFile(
-            resumeFile
-          );
+Name: ${data.name}
+Email: ${data.email}
+Phone: ${data.phone}
+Subject: ${data.subject}
 
-        if (fileError) {
-          return NextResponse.json(
-            {
-              error: fileError,
-            },
-            {
-              status: 400,
-            }
-          );
-        }
-      }
-
-      // ------------------------------------------------------
-      // EMAIL SUBJECT
-      // ------------------------------------------------------
-
-      subject =
-        `Internship application: ${data.fullName}`;
-
-      replyToEmail =
-        data.email;
-
-      // ------------------------------------------------------
-      // RESUME INFORMATION
-      // ------------------------------------------------------
-
-      let resumeInformation =
-        "Resume: Not provided";
-
-      if (data.resumeLink) {
-        resumeInformation =
-          `Resume Link: ${data.resumeLink}`;
-      }
-
-      if (resumeFile) {
-
-        const fileSizeMB =
-          (
-            resumeFile.size /
-            1024 /
-            1024
-          ).toFixed(2);
-
-        resumeInformation +=
-          `\nUploaded Resume: ${resumeFile.name} (${fileSizeMB} MB)`;
-      }
-
-      // ------------------------------------------------------
-      // EMAIL BODY
-      // ------------------------------------------------------
-
-      text = [
-        "NEW INTERNSHIP APPLICATION",
-        "",
-        `Name: ${data.fullName}`,
-        `Email: ${data.email}`,
-        `Phone: ${data.phone}`,
-        `College: ${data.collegeName}`,
-        `University: ${data.university}`,
-        `Course: ${data.course}`,
-        `Current year: ${data.year}`,
-        `Domain: ${data.domain}`,
-        resumeInformation,
-        "",
-        `Cover note: ${data.message || "-"}`,
-      ].join("\n");
+Message:
+${data.message}
+      `;
     }
 
-    // ========================================================
-    // APPLY / SPARK FORM
-    // ========================================================
+    /* ============================================================
+       INTERNSHIP FORM
+    ============================================================ */
 
-    else if (
-      form === "apply"
-    ) {
-
+    else if (form === "internship") {
       const data = {
-        name: getString(
-          formData,
-          "name"
-        ),
-
-        email: getString(
-          formData,
-          "email"
-        ),
-
-        phone: getString(
-          formData,
-          "phone"
-        ),
-
-        program: getString(
-          formData,
-          "program"
-        ),
-
-        location: getString(
-          formData,
-          "location"
-        ),
-
-        duration: getString(
-          formData,
-          "duration"
-        ),
-
-        areaOfInterest:
-          getString(
-            formData,
-            "areaOfInterest"
-          ),
+        fullName: getString(formData, "fullName"),
+        email: getString(formData, "email"),
+        phone: getString(formData, "phone"),
+        collegeName: getString(formData, "collegeName"),
+        university: getString(formData, "university"),
+        course: getString(formData, "course"),
+        year: getString(formData, "year"),
+        domain: getString(formData, "domain"),
+        resumeLink: getString(formData, "resumeLink"),
+        message: getString(formData, "message"),
       };
 
-      // Validate
-      applySchema.parse(data);
+      const validation = internshipSchema.safeParse(data);
 
-      subject =
-        `New Course / SPARK Query: ${data.name} - ${data.program}`;
+      if (!validation.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Please check your internship form.",
+            details: validation.error.issues,
+          },
+          { status: 400 }
+        );
+      }
 
-      replyToEmail =
-        data.email;
+      const resume = formData.get("resume");
 
-      text = [
-        `Name: ${data.name}`,
-        `Email: ${data.email}`,
-        `Phone: ${data.phone}`,
-        `Selected Program: ${data.program}`,
-        `Preferred Location: ${data.location}`,
-        `Duration: ${data.duration}`,
-        `Area of Interest: ${
-          data.areaOfInterest || "N/A"
-        }`,
-      ].join("\n");
+      if (!data.resumeLink && !(resume instanceof File)) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Please provide a resume link or upload your resume.",
+          },
+          { status: 400 }
+        );
+      }
+
+      subject = `Internship Application: ${data.fullName}`;
+      replyTo = data.email;
+
+      text = `
+NEW INTERNSHIP APPLICATION
+
+Name: ${data.fullName}
+Email: ${data.email}
+Phone: ${data.phone}
+College: ${data.collegeName}
+University: ${data.university}
+Course: ${data.course}
+Year: ${data.year}
+Domain: ${data.domain}
+Resume Link: ${data.resumeLink || "Uploaded file"}
+
+Message:
+${data.message || "-"}
+      `;
     }
 
-    // ========================================================
-    // PREPARE EMAIL
-    // ========================================================
+    /* ============================================================
+       APPLY / SPARK FORM
+    ============================================================ */
+
+    else if (form === "apply") {
+      const data = {
+        name: getString(formData, "name"),
+        email: getString(formData, "email"),
+        phone: getString(formData, "phone"),
+        program: getString(formData, "program"),
+        location: getString(formData, "location"),
+        duration: getString(formData, "duration"),
+        areaOfInterest: getString(
+          formData,
+          "areaOfInterest"
+        ),
+      };
+
+      const validation = applySchema.safeParse(data);
+
+      if (!validation.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: "Please check your application form.",
+            details: validation.error.issues,
+          },
+          { status: 400 }
+        );
+      }
+
+      subject = `New Course Application: ${data.name}`;
+      replyTo = data.email;
+
+      text = `
+NEW COURSE / SPARK APPLICATION
+
+Name: ${data.name}
+Email: ${data.email}
+Phone: ${data.phone}
+Program: ${data.program}
+Location: ${data.location}
+Duration: ${data.duration}
+Area of Interest: ${data.areaOfInterest || "N/A"}
+      `;
+    }
+
+    /* ============================================================
+       EMAIL
+    ============================================================ */
 
     const mailOptions: nodemailer.SendMailOptions = {
-      from: userAddress(),
+      from: process.env.SMTP_USER,
       to: recipient,
-      replyTo: replyToEmail,
+      replyTo: replyTo || undefined,
       subject,
       text,
     };
 
-    // ========================================================
-    // ATTACH RESUME
-    // ========================================================
+    /*
+     * Attach resume if uploaded
+     */
 
-    if (
-      form === "internship"
-    ) {
+    if (form === "internship") {
+      const resume = formData.get("resume");
 
-      const resumeValue =
-        formData.get("resume");
-
-      if (
-        resumeValue instanceof File &&
-        resumeValue.size > 0
-      ) {
-
-        const buffer =
-          Buffer.from(
-            await resumeValue.arrayBuffer()
-          );
+      if (resume instanceof File && resume.size > 0) {
+        const buffer = Buffer.from(
+          await resume.arrayBuffer()
+        );
 
         mailOptions.attachments = [
           {
-            filename:
-              resumeValue.name,
-
-            content:
-              buffer,
-
-            contentType:
-              resumeValue.type ||
-              undefined,
+            filename: resume.name,
+            content: buffer,
+            contentType: resume.type,
           },
         ];
       }
     }
 
-    // ========================================================
-    // SEND EMAIL
-    // ========================================================
+    /* ============================================================
+       SEND EMAIL
+    ============================================================ */
 
-    await transporter.sendMail(
-      mailOptions
-    );
+    await transporter.sendMail(mailOptions);
 
-    // ========================================================
-    // SUCCESS RESPONSE
-    // ========================================================
+    console.log("Email sent successfully");
 
     return NextResponse.json(
       {
         success: true,
-        message:
-          "Your request has been submitted successfully.",
+        message: "Your request has been submitted successfully.",
       },
-      {
-        status: 200,
-      }
+      { status: 200 }
     );
-
   } catch (error) {
-
-    // ========================================================
-    // ZOD VALIDATION ERROR
-    // ========================================================
-
-    if (
-      error instanceof z.ZodError
-    ) {
-
-      console.error(
-        "Form validation failed:",
-        error.issues
-      );
-
-      return NextResponse.json(
-        {
-          error:
-            "Please check the form details and try again.",
-          details:
-            error.issues,
-        },
-        {
-          status: 400,
-        }
-      );
-    }
-
-    // ========================================================
-    // GENERAL ERROR
-    // ========================================================
-
-    console.error(
-      "Form email failed:",
-      error
-    );
+    console.error("FORM ERROR:", error);
 
     return NextResponse.json(
       {
+        success: false,
         error:
-          "Unable to send your request right now. Please try again later.",
+          error instanceof Error
+            ? error.message
+            : "Unable to send your request.",
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
