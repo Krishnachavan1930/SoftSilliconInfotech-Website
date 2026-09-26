@@ -73,13 +73,35 @@ function getTransporter() {
     );
   }
 
+  /*
+   * Gmail SMTP Configuration
+   *
+   * host: smtp.gmail.com
+   * port: 465
+   * secure: true
+   *
+   * family: 4 forces IPv4.
+   *
+   * `as any` is intentional here because some installed
+   * @types/nodemailer versions incorrectly select the generic
+   * TransportOptions overload and reject `host`.
+   */
+
   return nodemailer.createTransport({
-    service: "gmail",
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    family: 4,
+
     auth: {
       user,
-      pass: password,
+      pass: password.replace(/\s/g, ""),
     },
-  });
+
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
+  } as any);
 }
 
 /* ============================================================
@@ -88,37 +110,104 @@ function getTransporter() {
 
 export async function POST(request: Request) {
   try {
-    const contentType = request.headers.get("content-type") || "";
+    const contentType =
+      request.headers.get("content-type") || "";
 
     let formData: FormData;
 
-    /*
-     * CONTACT FORM CAN SEND JSON
-     */
+    /* ========================================================
+       JSON REQUEST
+    ======================================================== */
 
     if (contentType.includes("application/json")) {
       const body = await request.json();
 
       formData = new FormData();
 
-      formData.append("form", body.form || "");
+      const formType =
+        typeof body?.form === "string"
+          ? body.form
+          : "";
 
-      if (body.data) {
-        Object.entries(body.data).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            formData.append(key, String(value));
+      formData.append("form", formType);
+
+      /*
+       * Supports:
+       *
+       * {
+       *   form: "contact",
+       *   data: {
+       *     name: "...",
+       *     email: "..."
+       *   }
+       * }
+       */
+
+      if (
+        body?.data &&
+        typeof body.data === "object"
+      ) {
+        Object.entries(body.data).forEach(
+          ([key, value]) => {
+            if (
+              value !== undefined &&
+              value !== null
+            ) {
+              formData.append(
+                key,
+                String(value)
+              );
+            }
           }
-        });
+        );
+      }
+
+      /*
+       * Supports:
+       *
+       * {
+       *   form: "contact",
+       *   name: "...",
+       *   email: "..."
+       * }
+       */
+
+      if (
+        !body?.data &&
+        body &&
+        typeof body === "object"
+      ) {
+        Object.entries(body).forEach(
+          ([key, value]) => {
+            if (
+              key !== "form" &&
+              value !== undefined &&
+              value !== null
+            ) {
+              formData.append(
+                key,
+                String(value)
+              );
+            }
+          }
+        );
       }
     } else {
-      /*
-       * INTERNSHIP / APPLY FORM CAN SEND FORMDATA
-       */
+      /* ======================================================
+         FORMDATA REQUEST
+      ====================================================== */
 
       formData = await request.formData();
     }
 
-    const form = getString(formData, "form");
+    /* ========================================================
+       GET FORM TYPE
+    ======================================================== */
+
+    const form = getString(
+      formData,
+      "form"
+    );
 
     if (
       form !== "contact" &&
@@ -128,11 +217,18 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Invalid form type",
+          error:
+            "Invalid form type. Expected contact, internship, or apply.",
         },
-        { status: 400 }
+        {
+          status: 400,
+        }
       );
     }
+
+    /* ========================================================
+       EMAIL RECIPIENT
+    ======================================================== */
 
     const recipient =
       process.env.FORM_RECIPIENT_EMAIL ||
@@ -144,39 +240,70 @@ export async function POST(request: Request) {
       );
     }
 
-    const transporter = getTransporter();
+    /* ========================================================
+       SMTP TRANSPORTER
+    ======================================================== */
+
+    const transporter =
+      getTransporter();
 
     let subject = "";
     let text = "";
     let replyTo = "";
 
-    /* ============================================================
+    /* ========================================================
        CONTACT FORM
-    ============================================================ */
+    ======================================================== */
 
     if (form === "contact") {
       const data = {
-        name: getString(formData, "name"),
-        email: getString(formData, "email"),
-        phone: getString(formData, "phone"),
-        subject: getString(formData, "subject"),
-        message: getString(formData, "message"),
+        name: getString(
+          formData,
+          "name"
+        ),
+
+        email: getString(
+          formData,
+          "email"
+        ),
+
+        phone: getString(
+          formData,
+          "phone"
+        ),
+
+        subject: getString(
+          formData,
+          "subject"
+        ),
+
+        message: getString(
+          formData,
+          "message"
+        ),
       };
 
-      const validation = contactSchema.safeParse(data);
+      const validation =
+        contactSchema.safeParse(data);
 
       if (!validation.success) {
         return NextResponse.json(
           {
             success: false,
-            error: "Please fill all fields correctly.",
-            details: validation.error.issues,
+            error:
+              "Please fill all fields correctly.",
+            details:
+              validation.error.issues,
           },
-          { status: 400 }
+          {
+            status: 400,
+          }
         );
       }
 
-      subject = `Website Contact: ${data.subject}`;
+      subject =
+        `Website Contact: ${data.subject}`;
+
       replyTo = data.email;
 
       text = `
@@ -192,50 +319,115 @@ ${data.message}
       `;
     }
 
-    /* ============================================================
+    /* ========================================================
        INTERNSHIP FORM
-    ============================================================ */
+    ======================================================== */
 
-    else if (form === "internship") {
+    else if (
+      form === "internship"
+    ) {
       const data = {
-        fullName: getString(formData, "fullName"),
-        email: getString(formData, "email"),
-        phone: getString(formData, "phone"),
-        collegeName: getString(formData, "collegeName"),
-        university: getString(formData, "university"),
-        course: getString(formData, "course"),
-        year: getString(formData, "year"),
-        domain: getString(formData, "domain"),
-        resumeLink: getString(formData, "resumeLink"),
-        message: getString(formData, "message"),
+        fullName: getString(
+          formData,
+          "fullName"
+        ),
+
+        email: getString(
+          formData,
+          "email"
+        ),
+
+        phone: getString(
+          formData,
+          "phone"
+        ),
+
+        collegeName: getString(
+          formData,
+          "collegeName"
+        ),
+
+        university: getString(
+          formData,
+          "university"
+        ),
+
+        course: getString(
+          formData,
+          "course"
+        ),
+
+        year: getString(
+          formData,
+          "year"
+        ),
+
+        domain: getString(
+          formData,
+          "domain"
+        ),
+
+        resumeLink: getString(
+          formData,
+          "resumeLink"
+        ),
+
+        message: getString(
+          formData,
+          "message"
+        ),
       };
 
-      const validation = internshipSchema.safeParse(data);
+      const validation =
+        internshipSchema.safeParse(
+          data
+        );
 
       if (!validation.success) {
         return NextResponse.json(
           {
             success: false,
-            error: "Please check your internship form.",
-            details: validation.error.issues,
+            error:
+              "Please check your internship form.",
+            details:
+              validation.error.issues,
           },
-          { status: 400 }
+          {
+            status: 400,
+          }
         );
       }
 
-      const resume = formData.get("resume");
+      /*
+       * Resume can be supplied as:
+       *
+       * 1. Resume URL
+       * OR
+       * 2. Uploaded resume file
+       */
 
-      if (!data.resumeLink && !(resume instanceof File)) {
+      const resume =
+        formData.get("resume");
+
+      if (
+        !data.resumeLink &&
+        !(resume instanceof File)
+      ) {
         return NextResponse.json(
           {
             success: false,
-            error: "Please provide a resume link or upload your resume.",
+            error:
+              "Please provide a resume link or upload your resume.",
           },
-          { status: 400 }
+          {
+            status: 400,
+          }
         );
       }
 
-      subject = `Internship Application: ${data.fullName}`;
+      subject =
+        `Internship Application: ${data.fullName}`;
+
       replyTo = data.email;
 
       text = `
@@ -249,45 +441,80 @@ University: ${data.university}
 Course: ${data.course}
 Year: ${data.year}
 Domain: ${data.domain}
-Resume Link: ${data.resumeLink || "Uploaded file"}
+Resume Link: ${
+        data.resumeLink ||
+        "Uploaded file"
+      }
 
 Message:
 ${data.message || "-"}
       `;
     }
 
-    /* ============================================================
+    /* ========================================================
        APPLY / SPARK FORM
-    ============================================================ */
+    ======================================================== */
 
     else if (form === "apply") {
       const data = {
-        name: getString(formData, "name"),
-        email: getString(formData, "email"),
-        phone: getString(formData, "phone"),
-        program: getString(formData, "program"),
-        location: getString(formData, "location"),
-        duration: getString(formData, "duration"),
-        areaOfInterest: getString(
+        name: getString(
           formData,
-          "areaOfInterest"
+          "name"
         ),
+
+        email: getString(
+          formData,
+          "email"
+        ),
+
+        phone: getString(
+          formData,
+          "phone"
+        ),
+
+        program: getString(
+          formData,
+          "program"
+        ),
+
+        location: getString(
+          formData,
+          "location"
+        ),
+
+        duration: getString(
+          formData,
+          "duration"
+        ),
+
+        areaOfInterest:
+          getString(
+            formData,
+            "areaOfInterest"
+          ),
       };
 
-      const validation = applySchema.safeParse(data);
+      const validation =
+        applySchema.safeParse(data);
 
       if (!validation.success) {
         return NextResponse.json(
           {
             success: false,
-            error: "Please check your application form.",
-            details: validation.error.issues,
+            error:
+              "Please check your application form.",
+            details:
+              validation.error.issues,
           },
-          { status: 400 }
+          {
+            status: 400,
+          }
         );
       }
 
-      subject = `New Course Application: ${data.name}`;
+      subject =
+        `New Course Application: ${data.name}`;
+
       replyTo = data.email;
 
       text = `
@@ -299,61 +526,107 @@ Phone: ${data.phone}
 Program: ${data.program}
 Location: ${data.location}
 Duration: ${data.duration}
-Area of Interest: ${data.areaOfInterest || "N/A"}
+Area of Interest: ${
+        data.areaOfInterest ||
+        "N/A"
+      }
       `;
     }
 
-    /* ============================================================
-       EMAIL
-    ============================================================ */
+    /* ========================================================
+       EMAIL OPTIONS
+    ======================================================== */
 
-    const mailOptions: nodemailer.SendMailOptions = {
-      from: process.env.SMTP_USER,
-      to: recipient,
-      replyTo: replyTo || undefined,
-      subject,
-      text,
-    };
+    const mailOptions: nodemailer.SendMailOptions =
+      {
+        from: process.env.SMTP_USER,
+        to: recipient,
+        replyTo:
+          replyTo || undefined,
+        subject,
+        text,
+      };
 
-    /*
-     * Attach resume if uploaded
-     */
+    /* ========================================================
+       ATTACH RESUME
+    ======================================================== */
 
-    if (form === "internship") {
-      const resume = formData.get("resume");
+    if (
+      form === "internship"
+    ) {
+      const resume =
+        formData.get("resume");
 
-      if (resume instanceof File && resume.size > 0) {
-        const buffer = Buffer.from(
-          await resume.arrayBuffer()
-        );
+      if (
+        resume instanceof File &&
+        resume.size > 0
+      ) {
+        const buffer =
+          Buffer.from(
+            await resume.arrayBuffer()
+          );
 
         mailOptions.attachments = [
           {
-            filename: resume.name,
-            content: buffer,
-            contentType: resume.type,
+            filename:
+              resume.name,
+
+            content:
+              buffer,
+
+            contentType:
+              resume.type ||
+              "application/octet-stream",
           },
         ];
       }
     }
 
-    /* ============================================================
+    /* ========================================================
+       VERIFY SMTP CONNECTION
+    ======================================================== */
+
+    console.log(
+      "Checking SMTP connection..."
+    );
+
+    await transporter.verify();
+
+    console.log(
+      "SMTP connection successful"
+    );
+
+    /* ========================================================
        SEND EMAIL
-    ============================================================ */
+    ======================================================== */
 
-    await transporter.sendMail(mailOptions);
+    await transporter.sendMail(
+      mailOptions
+    );
 
-    console.log("Email sent successfully");
+    console.log(
+      "Email sent successfully"
+    );
+
+    /* ========================================================
+       SUCCESS RESPONSE
+    ======================================================== */
 
     return NextResponse.json(
       {
         success: true,
-        message: "Your request has been submitted successfully.",
+        message:
+          "Your request has been submitted successfully.",
       },
-      { status: 200 }
+      {
+        status: 200,
+      }
     );
   } catch (error) {
-    console.error("FORM ERROR:", error);
+    console.error(
+      "FORM ERROR:",
+      error
+    );
 
     return NextResponse.json(
       {
@@ -363,7 +636,9 @@ Area of Interest: ${data.areaOfInterest || "N/A"}
             ? error.message
             : "Unable to send your request.",
       },
-      { status: 500 }
+      {
+        status: 500,
+      }
     );
   }
 }
